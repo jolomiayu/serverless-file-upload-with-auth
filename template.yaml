@@ -1,41 +1,76 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Serverless Upload Project
+
+Description: Serverless File Upload System with Cognito Authentication
 
 Resources:
 
   UploadBucket:
     Type: AWS::S3::Bucket
 
+  # ✅ Cognito User Pool
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: UploadUserPool
+      AutoVerifiedAttributes:
+        - email
+
+  # ✅ Cognito App Client
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: UploadClient
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+
+  # ✅ API Gateway with Cognito Authorizer
+  ServerlessApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt UserPool.Arn
+
+  # ✅ Lambda Function
   UploadFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: hello_world/
       Handler: app.lambda_handler
-      Runtime: python3.10
+      Runtime: python3.9
+      CodeUri: hello_world/
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref UploadBucket
 
       Environment:
         Variables:
           BUCKET_NAME: !Ref UploadBucket
 
-      Policies:
-        - S3CrudPolicy:
-            BucketName: !Ref UploadBucket
-
       Events:
         UploadApi:
           Type: Api
           Properties:
+            RestApiId: !Ref ServerlessApi
             Path: /upload-url
             Method: get
 
         DownloadApi:
           Type: Api
           Properties:
+            RestApiId: !Ref ServerlessApi
             Path: /download-url
             Method: get
 
 Outputs:
-  ApiUrl:
-    Description: "API Gateway endpoint URL"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  ApiBaseUrl:
+    Value: !Sub "https://${ServerlessApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+
+  UserPoolId:
+    Value: !Ref UserPool
+
+  UserPoolClientId:
+    Value: !Ref UserPoolClient

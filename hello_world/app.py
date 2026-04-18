@@ -7,11 +7,9 @@ s3 = boto3.client('s3')
 BUCKET = os.environ['BUCKET_NAME']
 
 def lambda_handler(event, context):
-    print("Incoming event:", json.dumps(event))
+    print("Incoming event:", event)
 
-    # ✅ Correct for REST API (SAM default)
     path = event.get("path", "")
-    print("Path:", path)
 
     # =========================
     # UPLOAD URL
@@ -47,7 +45,9 @@ def lambda_handler(event, context):
         if not file_name:
             return {
                 "statusCode": 400,
-                "body": json.dumps({"error": "fileName is required"})
+                "body": json.dumps({
+                    "error": "fileName is required"
+                })
             }
 
         url = s3.generate_presigned_url(
@@ -68,5 +68,7 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 404,
-        "body": json.dumps({"message": "Not Found"})
+        "body": json.dumps({
+            "message": "Not Found"
+        })
     }

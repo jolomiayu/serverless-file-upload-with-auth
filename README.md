@@ -1,42 +1,39 @@
-🚀 Secure Serverless File Upload System (AWS + Cognito)
+🚀 Secure Serverless File Upload System (AWS + Cognito + CI/CD)
 
 📌 Overview
 
-This project demonstrates a production-style serverless architecture for secure file upload and download using AWS services.
+This project demonstrates a production-ready serverless architecture for secure file upload and download using AWS.
 
-It implements authentication with Amazon Cognito, ensuring that only authorized users can access the API endpoints.
+It integrates authentication, secure API access, and automated deployment (CI/CD).
 
 ---
 
 🏗️ Architecture
 
 Client → API Gateway (Cognito Authorizer) → AWS Lambda → Amazon S3
-
-- Amazon Cognito – User authentication (JWT tokens)
-- API Gateway – Secured endpoints with Cognito Authorizer
-- AWS Lambda – Backend logic
-- Amazon S3 – File storage using pre-signed URLs
-- AWS SAM – Infrastructure as Code (IaC)
+GitHub → CodePipeline → CodeBuild → Deploy (AWS SAM)
 
 ---
 
 🔐 Key Features
 
-- ✅ Secure API endpoints using Cognito authentication
-- ✅ Pre-signed URL generation for upload & download
-- ✅ Direct client-to-S3 upload (no backend bottleneck)
-- ✅ Fully serverless architecture
-- ✅ Infrastructure defined and deployed with AWS SAM
+- 🔒 Authentication using Amazon Cognito (JWT-based)
+- 🔑 Protected API endpoints via API Gateway Authorizer
+- 📤 Pre-signed URL generation for secure uploads
+- 📥 Pre-signed URL generation for secure downloads
+- ⚡ Direct upload to S3 (no backend bottleneck)
+- 🚀 Fully serverless architecture
+- 🔄 CI/CD pipeline for automatic deployment
 
 ---
 
 ⚙️ API Endpoints
 
-🔹 Get Upload URL
+Upload URL
 
-GET /upload-url
+GET "/upload-url"
 
-Response
+Response:
 
 {
   "uploadUrl": "https://...",
@@ -45,11 +42,11 @@ Response
 
 ---
 
-🔹 Get Download URL
+Download URL
 
-GET /download-url?fileName=your-file-id
+GET "/download-url?fileName=your-file-id"
 
-Response
+Response:
 
 {
   "downloadUrl": "https://..."
@@ -60,8 +57,8 @@ Response
 🔑 Authentication Flow
 
 1. User logs in via Cognito
-2. Receives JWT (IdToken)
-3. Token is passed in request header:
+2. Receives JWT token (IdToken)
+3. Token is sent in request header:
 
 Authorization: <IdToken>
 
@@ -69,28 +66,28 @@ Authorization: <IdToken>
 
 ---
 
-🚀 Deployment (AWS SAM)
+🔄 CI/CD Pipeline
+
+This project uses:
+
+- AWS CodePipeline
+- AWS CodeBuild
+
+Flow:
+
+1. Code pushed to GitHub
+2. Pipeline triggers automatically
+3. CodeBuild runs:
+   - "sam build"
+   - "sam deploy"
+4. Application is updated automatically
+
+---
+
+🚀 Deployment
 
 sam build
-sam deploy --guided
-
----
-
-🧪 Testing (CLI)
-
-1. Authenticate user
-
-aws cognito-idp initiate-auth \
---auth-flow USER_PASSWORD_AUTH \
---client-id <CLIENT_ID> \
---auth-parameters USERNAME=<EMAIL>,PASSWORD=<PASSWORD>
-
----
-
-2. Call protected endpoint
-
-curl -H "Authorization: <ID_TOKEN>" \
-https://your-api-url/Prod/upload-url
+sam deploy
 
 ---
 
@@ -100,6 +97,7 @@ https://your-api-url/Prod/upload-url
 ├── hello_world/
 │   └── app.py
 ├── template.yaml
+├── buildspec.yml
 ├── samconfig.toml
 └── README.md
 
@@ -107,22 +105,23 @@ https://your-api-url/Prod/upload-url
 
 📌 Lessons Learned
 
-- Implementing authentication with Cognito can introduce hidden challenges (e.g. auth flows, password states)
-- API Gateway authorizers enforce strict token validation
-- Debugging requires combining CloudWatch logs with service configuration checks
+- Implementing Cognito authentication requires proper auth flow configuration
+- Pre-signed URLs provide secure and scalable file handling
+- CI/CD pipelines automate deployment and reduce manual errors
+- Debugging AWS services requires understanding interactions between components
 
 ---
 
 🔥 Future Improvements
 
 - Add frontend (React / simple UI)
-- File type and size validation
-- Logging & monitoring enhancements
-- CI/CD pipeline integration
+- File validation (size/type restrictions)
+- Monitoring and alerting (CloudWatch + SNS)
+- Role-based access control
 
 ---
 
 👤 Author
 
-Built by Jolomi Ayu
+Jolomi Ayu
 Aspiring Cloud Engineer ☁️

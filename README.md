@@ -1,33 +1,50 @@
-🚀 Secure Serverless File Upload System (AWS + Cognito + CI/CD)
+🚀 Secure Serverless File Upload System (AWS + Cognito + CI/CD + Frontend)
 
 📌 Overview
 
-This project demonstrates a production-ready serverless architecture for secure file upload and download using AWS.
+This project demonstrates a production-ready serverless architecture for secure file upload and download.
 
-It integrates authentication, secure API access, and automated deployment (CI/CD).
+It includes:
+
+- Authentication (Cognito)
+- Secure API access
+- Direct file upload to S3
+- CI/CD pipeline
+- Browser-based frontend
 
 ---
 
 🏗️ Architecture
 
-Client → API Gateway (Cognito Authorizer) → AWS Lambda → Amazon S3
+Frontend → API Gateway (Cognito Authorizer) → Lambda → S3 (Pre-signed URL)
+
+CI/CD:
 GitHub → CodePipeline → CodeBuild → Deploy (AWS SAM)
 
 ---
 
 🔐 Key Features
 
-- 🔒 Authentication using Amazon Cognito (JWT-based)
-- 🔑 Protected API endpoints via API Gateway Authorizer
-- 📤 Pre-signed URL generation for secure uploads
-- 📥 Pre-signed URL generation for secure downloads
+- 🔒 JWT Authentication using Amazon Cognito
+- 🔑 Protected API endpoints (API Gateway Authorizer)
+- 📤 Secure file upload using pre-signed URLs
+- 📥 Secure file download links
 - ⚡ Direct upload to S3 (no backend bottleneck)
-- 🚀 Fully serverless architecture
-- 🔄 CI/CD pipeline for automatic deployment
+- 🔄 CI/CD pipeline for automated deployment
+- 🌐 Browser-based frontend (HTML + JS)
 
 ---
 
-⚙️ API Endpoints
+⚙️ How It Works
+
+1. User logs in → gets JWT token
+2. Token sent to API Gateway
+3. Lambda generates pre-signed S3 URL
+4. Frontend uploads file directly to S3
+
+---
+
+📡 API Endpoints
 
 Upload URL
 
@@ -36,58 +53,54 @@ GET "/upload-url"
 Response:
 
 {
-  "uploadUrl": "https://...",
-  "fileName": "unique-id"
+  "uploadUrl": "...",
+  "fileName": "..."
 }
 
 ---
 
 Download URL
 
-GET "/download-url?fileName=your-file-id"
+GET "/download-url?fileName=..."
 
 Response:
 
 {
-  "downloadUrl": "https://..."
+  "downloadUrl": "..."
 }
 
 ---
 
-🔑 Authentication Flow
-
-1. User logs in via Cognito
-2. Receives JWT token (IdToken)
-3. Token is sent in request header:
-
-Authorization: <IdToken>
-
-4. API Gateway validates token before invoking Lambda
-
----
-
 🔄 CI/CD Pipeline
-
-This project uses:
 
 - AWS CodePipeline
 - AWS CodeBuild
 
 Flow:
 
-1. Code pushed to GitHub
-2. Pipeline triggers automatically
-3. CodeBuild runs:
-   - "sam build"
-   - "sam deploy"
-4. Application is updated automatically
+1. Push to GitHub
+2. Pipeline triggers
+3. Build + Deploy automatically
 
 ---
 
-🚀 Deployment
+💻 Frontend
 
-sam build
-sam deploy
+Simple HTML interface:
+
+- Paste Cognito token
+- Select file
+- Upload directly to S3
+
+---
+
+🚀 Run Locally
+
+python3 -m http.server 8000
+
+Open:
+
+http://localhost:8000/index.html
 
 ---
 
@@ -98,6 +111,7 @@ sam deploy
 │   └── app.py
 ├── template.yaml
 ├── buildspec.yml
+├── index.html
 ├── samconfig.toml
 └── README.md
 
@@ -105,19 +119,19 @@ sam deploy
 
 📌 Lessons Learned
 
-- Implementing Cognito authentication requires proper auth flow configuration
-- Pre-signed URLs provide secure and scalable file handling
-- CI/CD pipelines automate deployment and reduce manual errors
-- Debugging AWS services requires understanding interactions between components
+- Pre-signed URLs require strict header matching
+- CORS must be configured for both API Gateway and S3
+- Browser environments behave differently from tools like Postman
+- CI/CD simplifies deployment and reduces errors
 
 ---
 
 🔥 Future Improvements
 
-- Add frontend (React / simple UI)
-- File validation (size/type restrictions)
-- Monitoring and alerting (CloudWatch + SNS)
-- Role-based access control
+- Deploy frontend to S3 (static hosting)
+- Add file list UI
+- Add file type validation
+- Add monitoring & alerts
 
 ---
 

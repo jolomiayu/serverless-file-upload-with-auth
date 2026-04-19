@@ -24,13 +24,18 @@ Resources:
       UserPoolId: !Ref UserPool
       GenerateSecret: false
 
-  # ✅ API Gateway with Cognito Authorizer
+  # ✅ API Gateway (CORS + Cognito FIXED)
   ServerlessApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
+      Cors:
+        AllowMethods: "'GET,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
       Auth:
         DefaultAuthorizer: CognitoAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false   # 🔥 CRITICAL FIX
         Authorizers:
           CognitoAuthorizer:
             UserPoolArn: !GetAtt UserPool.Arn
@@ -42,6 +47,7 @@ Resources:
       Handler: app.lambda_handler
       Runtime: python3.9
       CodeUri: hello_world/
+
       Policies:
         - S3CrudPolicy:
             BucketName: !Ref UploadBucket
@@ -57,20 +63,3 @@ Resources:
             RestApiId: !Ref ServerlessApi
             Path: /upload-url
             Method: get
-
-        DownloadApi:
-          Type: Api
-          Properties:
-            RestApiId: !Ref ServerlessApi
-            Path: /download-url
-            Method: get
-
-Outputs:
-  ApiBaseUrl:
-    Value: !Sub "https://${ServerlessApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
-
-  UserPoolId:
-    Value: !Ref UserPool
-
-  UserPoolClientId:
-    Value: !Ref UserPoolClient

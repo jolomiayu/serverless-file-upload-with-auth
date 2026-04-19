@@ -22,13 +22,16 @@ def lambda_handler(event, context):
             Params={
                 'Bucket': BUCKET,
                 'Key': file_name,
-                'ContentType': 'application/octet-stream'
+                'ContentType': 'application/octet-stream'   # ✅ IMPORTANT
             },
             ExpiresIn=300
         )
 
         return {
             "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
             "body": json.dumps({
                 "uploadUrl": url,
                 "fileName": file_name
@@ -45,6 +48,9 @@ def lambda_handler(event, context):
         if not file_name:
             return {
                 "statusCode": 400,
+                "headers": {
+                    "Access-Control-Allow-Origin": "*"
+                },
                 "body": json.dumps({
                     "error": "fileName is required"
                 })
@@ -61,6 +67,9 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            },
             "body": json.dumps({
                 "downloadUrl": url
             })
@@ -68,6 +77,9 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 404,
+        "headers": {
+            "Access-Control-Allow-Origin": "*"
+        },
         "body": json.dumps({
             "message": "Not Found"
         })
